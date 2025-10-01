@@ -11,23 +11,27 @@ const app = express();
 
 // ---------------------- CORS Setup ----------------------
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173', // Local dev + deployed frontend
+  process.env.FRONTEND_URL,           // Deployed frontend
+  'http://localhost:5173',            // Local dev
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
+      // allow requests with no origin (curl, Postman, mobile apps)
       if (!origin) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
-        return callback(new Error('❌ Not allowed by CORS'));
+        console.warn('❌ CORS blocked request from:', origin);
+        return callback(null, false); // ❌ instead of throwing error
       }
     },
     credentials: true,
   })
 );
+
 
 // ---------------------- Middleware ----------------------
 app.use(express.json());
