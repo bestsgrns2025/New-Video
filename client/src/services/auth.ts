@@ -1,7 +1,7 @@
-
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/auth';
+// ✅ Dynamically picks API URL depending on environment
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/auth';
 
 export const signup = (data: any) => {
     return axios.post(`${API_URL}/signup`, data);
