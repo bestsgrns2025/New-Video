@@ -8,8 +8,25 @@ const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
+// ✅ Setup CORS
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173"  // React local dev
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("❌ Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Root route
@@ -47,7 +64,7 @@ mongoose.connect(MONGO_URI)
         console.log('✅ MongoDB connected successfully');
 
         // Start server after DB connection
-        app.listen(PORT, () => {
+        app.listen(PORT, "0.0.0.0", () => {
             console.log(`🚀 Server running on port ${PORT}`);
         });
     })
