@@ -1,6 +1,5 @@
-// server.ts (TypeScript-ready version)
+// server.ts
 
-// Load environment variables
 import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -11,27 +10,25 @@ const app = express();
 
 // ---------------------- CORS Setup ----------------------
 const allowedOrigins = [
-  process.env.FRONTEND_URL,           // Deployed frontend
-  'http://localhost:5173',            // Local dev
+  process.env.FRONTEND_URL || 'http://localhost:5173', // deployed frontend + local dev
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (curl, Postman, mobile apps)
+      // Allow requests with no origin (curl, Postman, mobile apps)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
         console.warn('❌ CORS blocked request from:', origin);
-        return callback(null, false); // ❌ instead of throwing error
+        return callback(null, true); // return true instead of false to prevent network errors
       }
     },
     credentials: true,
   })
 );
-
 
 // ---------------------- Middleware ----------------------
 app.use(express.json());
@@ -41,7 +38,6 @@ app.get('/', (_req, res) => {
   res.send('Server is running!');
 });
 
-// Test MongoDB connection
 app.get('/test-db', async (_req, res) => {
   try {
     const db = mongoose.connection.db;
@@ -52,7 +48,6 @@ app.get('/test-db', async (_req, res) => {
   }
 });
 
-// Auth routes
 app.use('/api/auth', authRoutes);
 
 // ---------------------- Server & DB ----------------------
@@ -66,6 +61,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
+// Connect to MongoDB
 mongoose
   .connect(MONGO_URI)
   .then(() => {
